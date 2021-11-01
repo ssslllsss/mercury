@@ -358,7 +358,3 @@ pub fn pubkey_to_secp_address(lock_args: Bytes) -> H160 {
 
     H160::from_slice(&blake2b_160(script.as_slice())).unwrap()
 }
-
-pub fn minstant_elapsed(start: u64) -> f64 {
-    (minstant::now() - start) as f64 * minstant::nanos_per_cycle() / 1000f64
-}

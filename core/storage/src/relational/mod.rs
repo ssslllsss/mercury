@@ -303,6 +303,14 @@ impl Storage for RelationalStorage {
             .into());
         }
 
+        let is_in_range = |range: Option<Range>, num: u64| -> bool {
+            if let Some(r) = range {
+                r.is_in(num)
+            } else {
+                true
+            }
+        };
+
         let lock_hashes = lock_hashes
             .into_iter()
             .map(|hash| to_rb_bytes(hash.as_bytes()))
@@ -326,21 +334,27 @@ impl Storage for RelationalStorage {
             .response
             .iter()
         {
-            set.insert(TxHashInfo::new(
-                cell.out_point.tx_hash().unpack(),
-                cell.block_number,
-                cell.tx_index,
-            ));
-            if let Some(hash) = &cell.consumed_tx_hash {
+            if is_in_range(block_range.clone(), cell.block_number) {
                 set.insert(TxHashInfo::new(
-                    hash.clone(),
-                    cell.consumed_block_number.unwrap(),
-                    cell.consumed_tx_index.unwrap(),
+                    cell.out_point.tx_hash().unpack(),
+                    cell.block_number,
+                    cell.tx_index,
                 ));
+            }
+
+            if let Some(hash) = &cell.consumed_tx_hash {
+                if is_in_range(block_range.clone(), cell.consumed_block_number.unwrap()) {
+                    set.insert(TxHashInfo::new(
+                        hash.clone(),
+                        cell.consumed_block_number.unwrap(),
+                        cell.consumed_tx_index.unwrap(),
+                    ));
+                }
             }
         }
 
         let mut cells = set.into_iter().collect::<Vec<_>>();
+        let real_count = cells.len();
         cells.sort();
         if pagination.order == Order::Desc {
             cells.reverse();
@@ -371,14 +385,14 @@ impl Storage for RelationalStorage {
                 .into_iter()
                 .filter_map(|cell| {
                     if cell.block_number > from.0
-                        || (cell.block_number == from.0 && cell.tx_index >= from.1)
+                        || (cell.block_number == from.0 && cell.tx_index > from.1)
                     {
                         Some(to_rb_bytes(&cell.hash.0))
                     } else {
                         None
                     }
                 })
-                .take(limit)
+                .take(limit + 1)
                 .collect::<Vec<_>>()
         } else {
             cells
@@ -392,7 +406,7 @@ impl Storage for RelationalStorage {
                         None
                     }
                 })
-                .take(limit)
+                .take(limit + 1)
                 .collect::<Vec<_>>()
         };
 
@@ -414,7 +428,7 @@ impl Storage for RelationalStorage {
         Ok(fetch::to_pagination_response(
             txs_wrapper,
             next_cursor,
-            tx_tables.count.unwrap_or(0),
+            real_count as u64,
         ))
     }
 
