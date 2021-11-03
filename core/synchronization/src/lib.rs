@@ -142,7 +142,6 @@ impl<T: SyncAdapter> Synchronization<T> {
 
                 let mut indexer_cells = vec![];
                 let mut acquire = pool_clone.acquire().await.unwrap();
-                log::info!("[sync] build indexer cell table from {} to {}", i, end);
                 let w = pool_clone
                     .wrapper()
                     .between("block_number", i, end)
@@ -185,6 +184,8 @@ impl<T: SyncAdapter> Synchronization<T> {
             });
         }
 
+        let mut count = 0;
+        let mut tmp = 0;
         loop {
             let mut tip = 0;
             if let Some(cells) = rx.recv().await {
@@ -193,7 +194,13 @@ impl<T: SyncAdapter> Synchronization<T> {
                     tip = tip.max(max);
                 }
 
+                count += cells.len();
                 core_storage::save_batch_slice!(tx, cells);
+
+                if count % 100000 > tmp {
+                    log::info!("sync {} cells", count);
+                    tmp = count % 100000;
+                }
             }
 
             if tip == chain_tip {
