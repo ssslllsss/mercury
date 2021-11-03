@@ -48,9 +48,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.44"
+version = "1.0.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61604a8f862e1d5c3229fdd78f8b02c68dcf73a4c4b05fd636d12240aaa242c1"
+checksum = "ee10e43ae4a853c0a3591d4e2ada1719e553be18199d9da9d4a83f5927c2f5c7"
 
 [[package]]
 name = "arc-swap"
@@ -778,9 +778,9 @@ dependencies = [
 
 [[package]]
 name = "clang-sys"
-version = "1.2.2"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10612c0ec0e0a1ff0e97980647cb058a6e7aedb913d01d009c406b8b7d0b26ee"
+checksum = "fa66045b9cb23c2e9c1520732030608b02ee07e5cfaa5a521ec15ded7fa24c90"
 dependencies = [
  "glob",
  "libc",
@@ -815,7 +815,7 @@ dependencies = [
  "creep",
  "derive_more",
  "minstant 0.0.2",
- "num-bigint 0.4.2",
+ "num-bigint 0.4.3",
  "rand 0.8.4",
  "secp256k1",
  "serde",
@@ -894,7 +894,7 @@ dependencies = [
  "hex",
  "lazy_static",
  "molecule",
- "num-bigint 0.4.2",
+ "num-bigint 0.4.3",
  "num-traits",
  "parking_lot",
  "rand 0.8.4",
@@ -947,7 +947,7 @@ dependencies = [
  "lazysort",
  "log",
  "minstant 0.0.2",
- "num-bigint 0.4.2",
+ "num-bigint 0.4.3",
  "num-traits",
  "parking_lot",
  "protocol",
@@ -2530,9 +2530,9 @@ dependencies = [
 
 [[package]]
 name = "num-bigint"
-version = "0.4.2"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74e768dff5fb39a41b3bcd30bb25cf989706c90d028d1ad71971987aa309d535"
+checksum = "f93ab6289c7b344a8a9f60f88d80aa20032336fe78da341afc91c8a2341fc75f"
 dependencies = [
  "autocfg 1.0.1",
  "num-integer",
@@ -3738,7 +3738,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8eb4ea60fb301dc81dfc113df680571045d375ab7345d171c5dc7d7e13107a80"
 dependencies = [
  "chrono",
- "num-bigint 0.4.2",
+ "num-bigint 0.4.3",
  "num-traits",
  "thiserror",
 ]
