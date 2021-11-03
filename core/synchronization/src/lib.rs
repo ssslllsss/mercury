@@ -471,6 +471,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_sync() {
+        env_logger::init();
         let pool = connect_pg_pool().await;
         let sync = Synchronization::new(pool, Arc::new(MockCkbClient::default()), 100, 30);
         let mut tx = sync.pool.transaction().await.unwrap();
