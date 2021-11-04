@@ -139,6 +139,8 @@ impl Service {
             Arc::new(self.ckb_client.clone()),
             sync_task_size,
             max_task_number,
+            node_tip,
+            db_tip,
         );
 
         if (!sync_handler.is_previous_in_update().await?)
