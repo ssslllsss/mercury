@@ -475,7 +475,7 @@ mod tests {
         pool.connect(
             DBDriver::PostgreSQL,
             "mercury",
-            "0.0.0.0",
+            "47.242.31.83",
             5432,
             "postgres",
             "123456",
@@ -484,6 +484,11 @@ mod tests {
         .unwrap();
 
         pool
+    }
+
+    #[tokio::test]
+    async fn test_connect() {
+        connect_pg_pool().await;
     }
 
     #[tokio::test]
