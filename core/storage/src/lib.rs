@@ -193,3 +193,74 @@ pub trait Storage {
         pagination: PaginationRequest,
     ) -> Result<PaginationResponse<IndexerCellTable>>;
 }
+
+#[async_trait]
+pub trait ExtensionStorage {
+    async fn get_live_cells(
+        &self,
+        ctx: Context,
+        out_point: Option<packed::OutPoint>,
+        lock_hashes: Vec<H256>,
+        type_hashes: Vec<H256>,
+    ) -> Result<Vec<DetailedCell>>;
+
+    async fn get_historical_live_cells(
+        &self,
+        ctx: Context,
+        lock_hashes: Vec<H256>,
+        type_hashes: Vec<H256>,
+        tip_block_number: BlockNumber,
+    ) -> Result<Vec<DetailedCell>>;
+
+    async fn get_cells(
+        &self,
+        ctx: Context,
+        out_point: Option<packed::OutPoint>,
+        lock_hashes: Vec<H256>,
+        type_hashes: Vec<H256>,
+        block_range: Option<Range>,
+    ) -> Result<Vec<DetailedCell>>;
+
+    async fn get_transactions_by_hashes(
+        &self,
+        ctx: Context,
+        tx_hashes: Vec<H256>,
+        block_range: Option<Range>,
+    ) -> Result<Vec<TransactionWrapper>>;
+
+    async fn get_transactions_by_scripts(
+        &self,
+        ctx: Context,
+        lock_hashes: Vec<H256>,
+        type_hashes: Vec<H256>,
+        block_range: Option<Range>,
+    ) -> Result<Vec<TransactionWrapper>>;
+
+    async fn get_block_header(
+        &self,
+        ctx: Context,
+        block_hash: Option<H256>,
+        block_number: Option<BlockNumber>,
+    ) -> Result<HeaderView>;
+
+    async fn get_scripts(
+        &self,
+        ctx: Context,
+        script_hashes: Vec<H160>,
+        code_hash: Vec<H256>,
+        args_len: Option<usize>,
+        args: Vec<Bytes>,
+    ) -> Result<Vec<packed::Script>>;
+
+    async fn get_cells_by_partial_args(
+        &self,
+        ctx: Context,
+        p_lock_args: Option<PartialScriptArgs>,
+        p_type_args: Option<PartialScriptArgs>,
+    ) -> Result<Vec<DetailedCell>>;
+}
+
+pub struct PartialScriptArgs {
+    content: Bytes,
+    range: std::ops::Range<usize>,
+}

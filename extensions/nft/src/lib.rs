@@ -14,21 +14,21 @@ pub trait NFTRpc {
 }
 
 #[derive(Clone)]
-pub struct NftExtension<S> {
-    _store: S,
+pub struct NftExtension<SE> {
+    _store: SE,
     _builtin_scripts: HashMap<String, ScriptInfo>,
 }
 
 #[async_trait]
-impl<S: Storage + Sync + Send + 'static> NFTRpcServer for NftExtension<S> {
+impl<SE: Storage + Sync + Send + 'static> NFTRpcServer for NftExtension<SE> {
     async fn nft(&self) -> Result<(), Error> {
         Ok(())
     }
 }
 
-impl<S: Storage + Sync + Send + 'static> NftExtension<S> {
+impl<SE: Storage + Sync + Send + 'static> NftExtension<SE> {
     pub fn new(
-        _store: S,
+        _store: SE,
         _builtin_scripts: HashMap<String, ScriptInfo>,
         _extra_config: Bytes,
     ) -> Self {
