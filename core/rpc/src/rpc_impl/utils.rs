@@ -1,7 +1,6 @@
 use crate::error::{InnerResult, RpcErrorMessage};
 use crate::rpc_impl::{
-    address_to_script, ACP_CODE_HASH, CHEQUE_CODE_HASH, CURRENT_BLOCK_NUMBER, CURRENT_EPOCH_NUMBER,
-    DAO_CODE_HASH, MIN_DAO_LOCK_PERIOD, SECP256K1_CODE_HASH, SUDT_CODE_HASH, TX_POOL_CACHE,
+    address_to_script, DAO_CODE_HASH, MIN_DAO_LOCK_PERIOD, SECP256K1_CODE_HASH, SUDT_CODE_HASH,
     WITHDRAWING_DAO_CELL_OCCUPIED_CAPACITY,
 };
 use crate::types::{
@@ -20,6 +19,9 @@ use common::{
 };
 use common_logger::tracing_async;
 use core_storage::Storage;
+use core_variable::{
+    ACP_CODE_HASH, CHEQUE_CODE_HASH, CURRENT_BLOCK_NUMBER, CURRENT_EPOCH_NUMBER, TX_POOL_CACHE,
+};
 
 use ckb_dao_utils::extract_dao_data;
 use ckb_types::core::{BlockNumber, Capacity, EpochNumberWithFraction, RationalU256};

@@ -21,16 +21,17 @@ members = [
 	"logger",
 	"common",
 	"core/cli",
-	"core/extensions",
 	"core/inspection",
 	"core/rpc",
 	"core/service",
 	"core/storage",
 	"core/synchronization",
+	"core/variable",
 	"db/protocol",
 	"db/rocksdb",
 	"db/xsql",
-	"db/xsql-test"
+	"db/xsql-test",
+	"extensions/nft"
 ]
 
 [profile.release]

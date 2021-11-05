@@ -1,5 +1,5 @@
 use crate::error::{InnerResult, RpcErrorMessage};
-use crate::rpc_impl::{address_to_script, CURRENT_BLOCK_NUMBER, CURRENT_EPOCH_NUMBER};
+use crate::rpc_impl::address_to_script;
 use crate::types::{
     indexer, indexer_legacy, AddressOrLockHash, AssetInfo, Balance, BlockInfo, BurnInfo,
     GetBalancePayload, GetBalanceResponse, GetBlockInfoPayload, GetSpentTransactionPayload,
@@ -12,6 +12,7 @@ use common::utils::parse_address;
 use common::{Context, Order, PaginationRequest, PaginationResponse, Range, SECP256K1};
 use common_logger::tracing_async;
 use core_storage::{DBInfo, Storage};
+use core_variable::{CURRENT_BLOCK_NUMBER, CURRENT_EPOCH_NUMBER};
 
 use ckb_jsonrpc_types::{self, Capacity, Script, Uint64};
 use ckb_types::{bytes::Bytes, packed, prelude::*, H160, H256};

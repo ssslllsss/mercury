@@ -1,9 +1,8 @@
 use crate::error::{InnerResult, RpcErrorMessage};
 use crate::rpc_impl::utils::address_to_identity;
 use crate::rpc_impl::{
-    address_to_script, utils, ACP_CODE_HASH, BYTE_SHANNONS, CHEQUE_CELL_CAPACITY, CHEQUE_CODE_HASH,
-    CURRENT_EPOCH_NUMBER, DEFAULT_FEE_RATE, INIT_ESTIMATE_FEE, MAX_ITEM_NUM, MIN_CKB_CAPACITY,
-    MIN_DAO_CAPACITY, STANDARD_SUDT_CAPACITY,
+    address_to_script, utils, BYTE_SHANNONS, CHEQUE_CELL_CAPACITY, DEFAULT_FEE_RATE,
+    INIT_ESTIMATE_FEE, MAX_ITEM_NUM, MIN_CKB_CAPACITY, MIN_DAO_CAPACITY, STANDARD_SUDT_CAPACITY,
 };
 use crate::types::{
     AddressOrLockHash, AssetInfo, AssetType, DaoClaimPayload, DaoDepositPayload,
@@ -14,12 +13,12 @@ use crate::types::{
 };
 use crate::{CkbRpc, MercuryRpcImpl};
 
-use ckb_types::packed::BytesOpt;
 use common::hash::blake2b_256_to_160;
 use common::utils::{decode_udt_amount, encode_udt_amount};
 use common::{Address, Context, DetailedCell, ACP, CHEQUE, DAO, SECP256K1, SUDT};
 use common_logger::tracing_async;
 use core_storage::Storage;
+use core_variable::{ACP_CODE_HASH, CHEQUE_CODE_HASH, CURRENT_EPOCH_NUMBER};
 
 use ckb_jsonrpc_types::TransactionView as JsonTransactionView;
 use ckb_types::core::{
@@ -31,7 +30,6 @@ use num_traits::Zero;
 use std::collections::{HashMap, HashSet};
 use std::convert::TryFrom;
 use std::str::FromStr;
-use std::vec;
 
 #[derive(Default, Clone, Debug)]
 pub struct CellWithData {
@@ -446,7 +444,7 @@ impl<C: CkbRpc> MercuryRpcImpl<C> {
             .pack();
             type_witness_args.insert(
                 inputs.len() - 1,
-                (witness_args_input_type, BytesOpt::default()),
+                (witness_args_input_type, packed::BytesOpt::default()),
             );
 
             // calculate maximum_withdraw_capacity

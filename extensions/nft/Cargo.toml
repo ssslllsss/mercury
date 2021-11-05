@@ -1,0 +1,15 @@
+[package]
+name = "nft"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ckb-types = "0.101"
+jsonrpsee-http-server = "0.4"
+jsonrpsee-proc-macros = "0.4"
+
+common = { path = "../../common" }
+
+core-storage = { path = "../../core/storage" }

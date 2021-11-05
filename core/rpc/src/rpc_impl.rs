@@ -27,31 +27,17 @@ use common::{
     PaginationResponse, Result, ACP, CHEQUE, DAO, SECP256K1, SUDT,
 };
 use core_storage::{DBInfo, RelationalStorage};
+use core_variable::{
+    ACP_CODE_HASH, CHEQUE_CODE_HASH, DAO_CODE_HASH, SECP256K1_CODE_HASH, SUDT_CODE_HASH,
+};
 
-use arc_swap::ArcSwap;
 use async_trait::async_trait;
 use ckb_jsonrpc_types::Uint64;
-use ckb_types::core::{BlockNumber, RationalU256};
-use ckb_types::{bytes::Bytes, packed, prelude::*, H160, H256};
+use ckb_types::{bytes::Bytes, core::RationalU256, packed, prelude::*, H160, H256};
 use clap::crate_version;
-use dashmap::DashMap;
 use jsonrpsee_http_server::types::Error;
-use parking_lot::RwLock;
 
-use std::collections::{HashMap, HashSet};
-use std::{str::FromStr, sync::Arc, thread::ThreadId};
-
-lazy_static::lazy_static! {
-    pub static ref TX_POOL_CACHE: RwLock<HashSet<packed::OutPoint>> = RwLock::new(HashSet::new());
-    pub static ref CURRENT_BLOCK_NUMBER: ArcSwap<BlockNumber> = ArcSwap::from_pointee(0u64);
-    pub static ref CURRENT_EPOCH_NUMBER: ArcSwap<RationalU256> = ArcSwap::from_pointee(RationalU256::zero());
-    pub static ref ACP_USED_CACHE: DashMap<ThreadId, Vec<packed::OutPoint>> = DashMap::new();
-    pub static ref SECP256K1_CODE_HASH: ArcSwap<H256> = ArcSwap::from_pointee(H256::default());
-    pub static ref SUDT_CODE_HASH: ArcSwap<H256> = ArcSwap::from_pointee(H256::default());
-    pub static ref ACP_CODE_HASH: ArcSwap<H256> = ArcSwap::from_pointee(H256::default());
-    pub static ref CHEQUE_CODE_HASH: ArcSwap<H256> = ArcSwap::from_pointee(H256::default());
-    pub static ref DAO_CODE_HASH: ArcSwap<H256> = ArcSwap::from_pointee(H256::default());
-}
+use std::{collections::HashMap, str::FromStr, sync::Arc};
 
 macro_rules! rpc_impl {
     ($self_: ident, $func: ident, $payload: expr) => {{
@@ -357,8 +343,4 @@ pub fn pubkey_to_secp_address(lock_args: Bytes) -> H160 {
     ));
 
     H160::from_slice(&blake2b_160(script.as_slice())).unwrap()
-}
-
-pub fn minstant_elapsed(start: u64) -> f64 {
-    (minstant::now() - start) as f64 * minstant::nanos_per_cycle() / 1000f64
 }

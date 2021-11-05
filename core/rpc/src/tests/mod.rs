@@ -8,8 +8,7 @@ mod sqlite;
 mod utils_test;
 
 use crate::rpc_impl::{
-    address_to_script, ACP_CODE_HASH, BYTE_SHANNONS, CHEQUE_CELL_CAPACITY, CHEQUE_CODE_HASH,
-    DAO_CODE_HASH, SECP256K1_CODE_HASH, STANDARD_SUDT_CAPACITY, SUDT_CODE_HASH,
+    address_to_script, BYTE_SHANNONS, CHEQUE_CELL_CAPACITY, STANDARD_SUDT_CAPACITY,
 };
 use crate::types::{
     AdjustAccountPayload, AdvanceQueryPayload, BlockInfo, DaoDepositPayload, DaoWithdrawPayload,
@@ -27,6 +26,9 @@ use common::{
 };
 use core_cli::config::{parse, MercuryConfig};
 use core_storage::{DBDriver, RelationalStorage, Storage};
+use core_variable::{
+    ACP_CODE_HASH, CHEQUE_CODE_HASH, DAO_CODE_HASH, SECP256K1_CODE_HASH, SUDT_CODE_HASH,
+};
 
 use ckb_jsonrpc_types::Status as JsonTransactionStatus;
 use ckb_types::core::{

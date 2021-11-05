@@ -5,17 +5,15 @@ mod middleware;
 // use middleware::{CkbRelayMiddleware, RelayMetadata};
 
 use common::{anyhow::anyhow, utils::ScriptInfo, Context, NetworkType, Result};
-use core_rpc::{
-    CkbRpc, CkbRpcClient, MercuryRpcImpl, MercuryRpcServer, CURRENT_BLOCK_NUMBER,
-    CURRENT_EPOCH_NUMBER, TX_POOL_CACHE,
-};
+use core_rpc::{CkbRpc, CkbRpcClient, MercuryRpcImpl, MercuryRpcServer};
 use core_storage::{DBDriver, RelationalStorage, Storage};
 use core_synchronization::Synchronization;
+use core_variable::{CURRENT_BLOCK_NUMBER, CURRENT_EPOCH_NUMBER, TX_POOL_CACHE};
 
 use ckb_jsonrpc_types::{RawTxPool, TransactionWithStatus};
 use ckb_types::core::{BlockNumber, BlockView, EpochNumberWithFraction, RationalU256};
 use ckb_types::{packed, H256};
-use jsonrpsee_http_server::{HttpServerBuilder, HttpStopHandle};
+use jsonrpsee_http_server::{HttpServerBuilder, HttpStopHandle, RpcModule};
 use log::{error, info, warn, LevelFilter};
 use tokio::time::{sleep, Duration};
 
@@ -116,9 +114,10 @@ impl Service {
 
         info!("Mercury Running!");
 
-        server
-            .start(mercury_rpc_impl.into_rpc())
-            .expect("Start jsonrpc http server")
+        let mut rpc_module = RpcModule::new(());
+        rpc_module.merge(mercury_rpc_impl.into_rpc()).unwrap();
+
+        server.start(rpc_module).expect("Start jsonrpc http server")
     }
 
     pub async fn do_sync(&self, sync_task_size: usize, max_task_number: usize) -> Result<()> {

@@ -39,6 +39,7 @@ common = { path = "../../common" }
 common-logger = { path = "../../logger" }
 core-storage = { path = "../storage" }
 core-synchronization = { path = "../synchronization"}
+core-variable = { path = "../variable" }
 protocol = { path = "../../db/protocol" }
 
 [dev-dependencies]
