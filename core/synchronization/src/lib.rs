@@ -202,7 +202,7 @@ impl<T: SyncAdapter> Synchronization<T> {
                         }
                     });
                 } else {
-                    sleep(Duration::from_secs(5)).await;
+                    sleep(Duration::from_secs(6)).await;
                 }
             }
         });
@@ -480,7 +480,7 @@ mod tests {
         pool.connect(
             DBDriver::PostgreSQL,
             "mercury",
-            "47.242.31.83",
+            "0.0.0.0",
             8432,
             "postgres",
             "123456",
