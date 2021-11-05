@@ -121,88 +121,95 @@ impl<T: SyncAdapter> Synchronization<T> {
         Ok(())
     }
 
-    async fn _build_indexer_cell_table(
-        &self,
-        tx: &mut RBatisTxExecutor<'_>,
-    ) -> Result<()> {
+    async fn _build_indexer_cell_table(&self, tx: &mut RBatisTxExecutor<'_>) -> Result<()> {
         use tokio::sync::mpsc::unbounded_channel;
 
         let (sx, mut rx) = unbounded_channel();
-        let tasks = RwLock::new(0);
 
         // Todo: can do perf here. Use a Lock-free concurrent data structure
         // such as corssbeam::SegQueue instead of Vec.
 
-        for i in page_range(self.chain_tip, INSERT_INDEXER_CELL_TABLE_SIZE)
-            .step_by(INSERT_INDEXER_CELL_TABLE_SIZE)
-        {
-            let pool_clone = self.pool.clone();
-            let tx_clone = sx.clone();
-            let task = *tasks.read();
+        let pool = self.pool.clone();
+        let txclone = sx.clone();
+        let chain_tip = self.chain_tip;
 
-            if task <= 50 {
-                {
-                    let mut cur = tasks.write();
-                    *cur += 1;
-                }
+        tokio::spawn(async move {
+            for i in page_range(chain_tip, INSERT_INDEXER_CELL_TABLE_SIZE)
+                .step_by(INSERT_INDEXER_CELL_TABLE_SIZE)
+            {
+                let pool_clone = pool.clone();
+                let tx_clone = txclone.clone();
+                let task = *CURRENT_TASK_NUMBER.read();
 
-                println!("task {}", task);
-                tokio::spawn(async move {
-                    let end = i + (INSERT_INDEXER_CELL_TABLE_SIZE as u32) - 1;
-                    let block_number_range = Range {
-                        start: i as u64,
-                        end: end as u64 + 1,
-                    };
+                if task <= 50 {
+                    {
+                        let mut cur = CURRENT_TASK_NUMBER.write();
+                        *cur += 1;
+                    }
 
-                    let mut indexer_cells = vec![];
-                    let mut acquire = pool_clone.acquire().await.unwrap();
-                    let w = pool_clone
-                        .wrapper()
-                        .between("block_number", i, end)
-                        .or()
-                        .between("consumed_block_number", i, end);
-                    let cells = acquire.fetch_list_by_wrapper::<CellTable>(w).await.unwrap();
+                    println!("task {}", task);
+                    tokio::spawn(async move {
+                        let end = i + (INSERT_INDEXER_CELL_TABLE_SIZE as u32) - 1;
+                        let block_number_range = Range {
+                            start: i as u64,
+                            end: end as u64 + 1,
+                        };
 
-                    for cell in cells.iter() {
-                        if block_number_range.contains(&cell.block_number) {
-                            let i_cell = IndexerCellTable::new_with_empty_scripts(
-                                cell.block_number,
-                                IO_TYPE_OUTPUT,
-                                cell.output_index,
-                                cell.tx_hash.clone(),
-                                cell.tx_index,
-                            );
-                            indexer_cells.push(i_cell.update_by_cell_table(cell));
-                        }
+                        let mut indexer_cells = vec![];
+                        let mut acquire = pool_clone.acquire().await.unwrap();
+                        let w = pool_clone
+                            .wrapper()
+                            .between("block_number", i, end)
+                            .or()
+                            .between("consumed_block_number", i, end);
+                        let cells = acquire.fetch_list_by_wrapper::<CellTable>(w).await.unwrap();
 
-                        if let Some(consume_number) = cell.consumed_block_number {
-                            if block_number_range.contains(&consume_number) {
+                        for cell in cells.iter() {
+                            if block_number_range.contains(&cell.block_number) {
                                 let i_cell = IndexerCellTable::new_with_empty_scripts(
-                                    consume_number,
-                                    IO_TYPE_INPUT,
-                                    cell.input_index.unwrap(),
-                                    cell.consumed_tx_hash.clone(),
-                                    cell.consumed_tx_index.unwrap(),
+                                    cell.block_number,
+                                    IO_TYPE_OUTPUT,
+                                    cell.output_index,
+                                    cell.tx_hash.clone(),
+                                    cell.tx_index,
                                 );
                                 indexer_cells.push(i_cell.update_by_cell_table(cell));
                             }
+
+                            if let Some(consume_number) = cell.consumed_block_number {
+                                if block_number_range.contains(&consume_number) {
+                                    let i_cell = IndexerCellTable::new_with_empty_scripts(
+                                        consume_number,
+                                        IO_TYPE_INPUT,
+                                        cell.input_index.unwrap(),
+                                        cell.consumed_tx_hash.clone(),
+                                        cell.consumed_tx_index.unwrap(),
+                                    );
+                                    indexer_cells.push(i_cell.update_by_cell_table(cell));
+                                }
+                            }
                         }
-                    }
 
-                    indexer_cells.sort();
-                    indexer_cells
-                        .iter_mut()
-                        .for_each(|c| c.id = generate_id(c.block_number));
+                        indexer_cells.sort();
+                        indexer_cells
+                            .iter_mut()
+                            .for_each(|c| c.id = generate_id(c.block_number));
 
-                    let _ = tx_clone.send(indexer_cells);
-                });
-            } else {
-                sleep(Duration::from_secs(5)).await;
+                        let _ = tx_clone.send(indexer_cells);
+                        {
+                            let mut cur = CURRENT_TASK_NUMBER.write();
+                            *cur -= 1;
+                        }
+                    });
+                } else {
+                    sleep(Duration::from_secs(5)).await;
+                }
             }
-        }
+        });
 
         let mut count = 0;
-        let mut tmp = 0;
+        let mut i = 0;
+
         loop {
             let mut tip = 0;
             if let Some(cells) = rx.recv().await {
@@ -211,13 +218,10 @@ impl<T: SyncAdapter> Synchronization<T> {
                     tip = tip.max(max);
                 }
 
+                i += 1;
                 count += cells.len();
                 core_storage::save_batch_slice!(tx, cells);
-
-                if count % 100000 > tmp {
-                    println!("sync {} cells", count);
-                    tmp = count % 100000;
-                }
+                println!("{} sync {} cells", i, count);
             }
 
             if tip == self.chain_tip {
@@ -457,6 +461,7 @@ fn page_range(chain_tip: u64, step_len: usize) -> Range<u32> {
 #[cfg(test)]
 mod tests {
     use core_storage::DBDriver;
+    use std::time::Instant;
 
     use super::*;
 
@@ -476,7 +481,7 @@ mod tests {
             DBDriver::PostgreSQL,
             "mercury",
             "47.242.31.83",
-            5432,
+            8432,
             "postgres",
             "123456",
         )
@@ -493,15 +498,24 @@ mod tests {
 
     #[tokio::test]
     async fn test_sync() {
-        env_logger::builder().filter_level(log::LevelFilter::Info).init();
+        env_logger::builder()
+            .filter_level(log::LevelFilter::Warn)
+            .init();
         let pool = connect_pg_pool().await;
-        let sync = Synchronization::new(pool, Arc::new(MockCkbClient::default()), 100, 30, 1_000_000, 0);
+        let sync = Synchronization::new(
+            pool,
+            Arc::new(MockCkbClient::default()),
+            100,
+            30,
+            1_000_000,
+            0,
+        );
+        let now = Instant::now();
         let mut tx = sync.pool.transaction().await.unwrap();
 
-        sync._build_indexer_cell_table(&mut tx)
-            .await
-            .unwrap();
+        sync._build_indexer_cell_table(&mut tx).await.unwrap();
         tx.commit().await.unwrap();
+        println!("cost {:?}", Instant::now() - now);
     }
 
     #[test]
