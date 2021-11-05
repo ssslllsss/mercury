@@ -13,6 +13,7 @@ pub trait NFTRpc {
     async fn nft(&self) -> Result<(), Error>;
 }
 
+#[derive(Clone)]
 pub struct NftExtension<S> {
     _store: S,
     _builtin_scripts: HashMap<String, ScriptInfo>,

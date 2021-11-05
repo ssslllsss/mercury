@@ -1,5 +1,7 @@
 #![allow(clippy::mutable_key_type, dead_code)]
 
+pub use jsonrpsee_http_server;
+
 mod middleware;
 
 // use middleware::{CkbRelayMiddleware, RelayMetadata};
@@ -14,7 +16,7 @@ use ckb_jsonrpc_types::{RawTxPool, TransactionWithStatus};
 use ckb_types::core::{BlockNumber, BlockView, EpochNumberWithFraction, RationalU256};
 use ckb_types::{packed, H256};
 use jsonrpsee_http_server::{HttpServerBuilder, HttpStopHandle, RpcModule};
-use log::{error, info, warn, LevelFilter};
+use log::{error, info, warn};
 use tokio::time::{sleep, Duration};
 
 use std::collections::{HashMap, HashSet};
@@ -37,9 +39,7 @@ pub struct Service {
 
 impl Service {
     pub fn new(
-        max_connections: u32,
-        center_id: u16,
-        machine_id: u16,
+        store: RelationalStorage,
         poll_interval: Duration,
         rpc_thread_num: usize,
         network_ty: &str,
@@ -47,10 +47,8 @@ impl Service {
         cellbase_maturity: u64,
         ckb_uri: String,
         cheque_since: u64,
-        log_level: LevelFilter,
     ) -> Self {
         let ckb_client = CkbRpcClient::new(ckb_uri);
-        let store = RelationalStorage::new(max_connections, center_id, machine_id, log_level);
         let network_type = NetworkType::from_raw_str(network_ty).expect("invalid network type");
         let cellbase_maturity = RationalU256::from_u256(cellbase_maturity.into());
         let cheque_since = RationalU256::from_u256(cheque_since.into());
@@ -78,6 +76,7 @@ impl Service {
         port: u16,
         user: String,
         password: String,
+        extensions: RpcModule<()>,
     ) -> HttpStopHandle {
         self.store
             .connect(
@@ -116,6 +115,7 @@ impl Service {
 
         let mut rpc_module = RpcModule::new(());
         rpc_module.merge(mercury_rpc_impl.into_rpc()).unwrap();
+        rpc_module.merge(extensions).unwrap();
 
         server.start(rpc_module).expect("Start jsonrpc http server")
     }

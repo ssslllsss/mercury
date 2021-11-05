@@ -22,6 +22,8 @@ toml = "0.5"
 common = { path = "../../common" }
 common-logger = { path = "../../logger" }
 core-service = { path = "../service" }
+core-storage = { path = "../storage" }
+ext-nft = { path = "../../extensions/nft" }
 
 [dev-dependencies]
 rand = "0.8"

@@ -772,6 +772,8 @@ dependencies = [
  "common",
  "common-logger",
  "core-service",
+ "core-storage",
+ "ext-nft",
  "fs_extra",
  "log",
  "log4rs",
@@ -823,6 +825,7 @@ dependencies = [
  "jsonrpc-http-server",
  "jsonrpsee-http-server",
  "jsonrpsee-proc-macros",
+ "jsonrpsee-utils",
  "lazy_static",
  "lazysort",
  "log",
@@ -1293,6 +1296,19 @@ name = "event-listener"
 version = "2.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f7531096570974c3a9dcf9e4b8e1cede1ec26cf5046219fb3b9d897503b9be59"
+
+[[package]]
+name = "ext-nft"
+version = "0.1.0"
+dependencies = [
+ "ckb-types",
+ "common",
+ "core-rpc",
+ "core-storage",
+ "jsonrpsee-http-server",
+ "jsonrpsee-proc-macros",
+ "jsonrpsee-utils",
+]
 
 [[package]]
 name = "fake-simd"
@@ -2304,17 +2320,6 @@ dependencies = [
  "cfg-if 0.1.10",
  "libc",
  "winapi",
-]
-
-[[package]]
-name = "nft"
-version = "0.1.0"
-dependencies = [
- "ckb-types",
- "common",
- "core-storage",
- "jsonrpsee-http-server",
- "jsonrpsee-proc-macros",
 ]
 
 [[package]]

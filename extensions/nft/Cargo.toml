@@ -1,5 +1,5 @@
 [package]
-name = "nft"
+name = "ext-nft"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,7 +9,9 @@ edition = "2021"
 ckb-types = "0.101"
 jsonrpsee-http-server = "0.4"
 jsonrpsee-proc-macros = "0.4"
+jsonrpsee-utils = "0.4"
 
 common = { path = "../../common" }
 
+core-rpc = { path = "../../core/rpc" }
 core-storage = { path = "../../core/storage" }

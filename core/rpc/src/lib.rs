@@ -19,11 +19,10 @@ use types::{
 pub use ckb_client::CkbRpcClient;
 pub use rpc_impl::MercuryRpcImpl;
 
-use common::{PaginationResponse, Result};
+use common::{async_trait, PaginationResponse, Result};
 use core_storage::DBInfo;
 use core_synchronization::SyncAdapter;
 
-use async_trait::async_trait;
 use ckb_jsonrpc_types::{
     BlockView, EpochView, LocalNode, RawTxPool, TransactionWithStatus, Uint64,
 };

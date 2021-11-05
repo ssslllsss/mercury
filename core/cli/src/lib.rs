@@ -3,7 +3,9 @@ pub mod config;
 use crate::config::{parse, MercuryConfig};
 
 use common_logger::init_jaeger;
-use core_service::Service;
+use core_service::{jsonrpsee_http_server::RpcModule, Service};
+use core_storage::RelationalStorage;
+use ext_nft::{NFTRpcServer, NftExtension};
 
 use ansi_term::Colour::Green;
 use clap::{crate_version, App, Arg, ArgMatches, SubCommand};
@@ -107,10 +109,15 @@ impl<'a> Cli<'a> {
             init_jaeger(self.config.log_config.jaeger_uri.clone().unwrap());
         }
 
-        let service = Service::new(
+        let store = RelationalStorage::new(
             self.config.db_config.max_connections,
             self.config.center_id,
             self.config.machine_id,
+            LevelFilter::from_str(&self.config.db_config.db_log_level).unwrap(),
+        );
+
+        let service = Service::new(
+            store.clone(),
             Duration::from_secs(2),
             self.config.rpc_thread_num,
             &self.config.network_config.network_type,
@@ -118,7 +125,6 @@ impl<'a> Cli<'a> {
             self.config.cellbase_maturity,
             self.parse_cmd_args("ckb_uri", self.config.network_config.ckb_uri.clone()),
             self.config.cheque_since,
-            LevelFilter::from_str(&self.config.db_config.db_log_level).unwrap(),
         );
 
         let stop_handle = service
@@ -130,6 +136,7 @@ impl<'a> Cli<'a> {
                 self.parse_cmd_args("db_port", self.config.db_config.db_port),
                 self.parse_cmd_args("db_user", self.config.db_config.db_user.clone()),
                 self.parse_cmd_args("db_pwd", self.config.db_config.password.clone()),
+                self.init_extensions(store),
             )
             .await;
 
@@ -153,6 +160,19 @@ impl<'a> Cli<'a> {
 
         stop_handle.stop().unwrap().await.unwrap();
         info!("Closing!");
+    }
+
+    fn init_extensions(&self, store: RelationalStorage) -> RpcModule<()> {
+        let mut ext_rpcs = RpcModule::new(());
+
+        ext_rpcs
+            .merge(
+                NftExtension::new(store, self.config.to_script_map(), Default::default())
+                    .into_rpc(),
+            )
+            .unwrap();
+
+        ext_rpcs
     }
 
     fn log_init(&self) {
