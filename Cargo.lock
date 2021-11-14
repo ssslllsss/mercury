@@ -713,6 +713,7 @@ dependencies = [
  "bech32",
  "blake2b-rs",
  "ckb-hash",
+ "ckb-jsonrpc-types",
  "ckb-types",
  "creep",
  "derive_more",
@@ -1301,13 +1302,17 @@ checksum = "f7531096570974c3a9dcf9e4b8e1cede1ec26cf5046219fb3b9d897503b9be59"
 name = "ext-nft"
 version = "0.1.0"
 dependencies = [
+ "ckb-jsonrpc-types",
  "ckb-types",
  "common",
  "core-rpc",
  "core-storage",
+ "hex",
  "jsonrpsee-http-server",
  "jsonrpsee-proc-macros",
  "jsonrpsee-utils",
+ "log",
+ "serde",
 ]
 
 [[package]]

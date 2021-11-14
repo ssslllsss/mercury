@@ -7,10 +7,10 @@ use crate::relational::{to_rb_bytes, RelationalStorage};
 
 use common::{
     utils, utils::to_fixed_array, Context, DetailedCell, PaginationRequest, PaginationResponse,
-    Range, Result,
+    Range, Result, TransactionWrapper,
 };
 use common_logger::tracing_async;
-use db_protocol::{SimpleBlock, SimpleTransaction, TransactionWrapper};
+use db_protocol::{SimpleBlock, SimpleTransaction};
 use db_xsql::page::PageRequest;
 use db_xsql::rbatis::core::types::byte::RbBytes;
 use db_xsql::rbatis::{crud::CRUDMut, plugin::page::Page};

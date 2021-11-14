@@ -9,7 +9,9 @@ use crate::types::{
 use crate::{CkbRpc, MercuryRpcImpl};
 
 use common::utils::parse_address;
-use common::{Context, Order, PaginationRequest, PaginationResponse, Range, SECP256K1};
+use common::{
+    Context, Order, PaginationRequest, PaginationResponse, Range, TransactionWrapper, SECP256K1,
+};
 use common_logger::tracing_async;
 use core_storage::{DBInfo, Storage};
 use core_variable::{CURRENT_BLOCK_NUMBER, CURRENT_EPOCH_NUMBER};
@@ -19,7 +21,6 @@ use ckb_types::{bytes::Bytes, packed, prelude::*, H160, H256};
 use num_bigint::BigInt;
 use num_traits::{ToPrimitive, Zero};
 
-use protocol::TransactionWrapper;
 use std::collections::{HashMap, HashSet};
 use std::{convert::TryInto, iter::Iterator, str::FromStr};
 

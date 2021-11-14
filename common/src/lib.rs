@@ -5,7 +5,12 @@ pub mod utils;
 pub use address::{Address, AddressPayload, AddressType, CodeHashIndex};
 pub use {anyhow, anyhow::Result, async_trait::async_trait, creep::Context, derive_more, minstant};
 
-use ckb_types::{bytes::Bytes, core::BlockNumber, h256, packed, H256};
+use ckb_jsonrpc_types::TransactionWithStatus;
+use ckb_types::{
+    bytes::Bytes,
+    core::{BlockNumber, TransactionView},
+    h256, packed, H256,
+};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
@@ -237,4 +242,13 @@ pub struct DetailedCell {
     pub consumed_tx_index: Option<u32>,
     pub consumed_input_index: Option<u32>,
     pub since: Option<u64>,
+}
+
+#[derive(Clone, Debug)]
+pub struct TransactionWrapper {
+    pub transaction_with_status: TransactionWithStatus,
+    pub transaction_view: TransactionView,
+    pub input_cells: Vec<DetailedCell>,
+    pub output_cells: Vec<DetailedCell>,
+    pub is_cellbase: bool,
 }

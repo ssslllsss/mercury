@@ -14,8 +14,8 @@ use crate::{CkbRpc, MercuryRpcImpl};
 use common::hash::blake2b_160;
 use common::utils::{decode_dao_block_number, decode_udt_amount, parse_address, u256_low_u64};
 use common::{
-    Address, AddressPayload, Context, DetailedCell, PaginationRequest, PaginationResponse, Range,
-    ACP, CHEQUE, DAO, SECP256K1, async_trait, Result
+    async_trait, Address, AddressPayload, Context, DetailedCell, PaginationRequest,
+    PaginationResponse, Range, Result, TransactionWrapper, ACP, CHEQUE, DAO, SECP256K1,
 };
 use common_logger::tracing_async;
 use core_storage::Storage;
@@ -24,10 +24,10 @@ use core_variable::{
 };
 
 use ckb_dao_utils::extract_dao_data;
+use ckb_jsonrpc_types::TransactionView;
 use ckb_types::core::{BlockNumber, Capacity, EpochNumberWithFraction, RationalU256};
 use ckb_types::{bytes::Bytes, packed, prelude::*, H160, H256};
 use num_bigint::{BigInt, BigUint};
-use protocol::TransactionWrapper;
 
 use std::collections::{HashMap, HashSet};
 use std::convert::TryInto;
@@ -66,6 +66,17 @@ pub trait RpcUtility {
         signature_actions: &mut HashMap<String, SignatureAction>,
         input_index: &mut usize,
     ) -> Result<()>;
+
+    fn prebuild_tx_complete(
+        &self,
+        inputs: Vec<packed::CellInput>,
+        outputs: Vec<packed::CellOutput>,
+        cells_data: Vec<packed::Bytes>,
+        script_set: HashSet<String>,
+        header_deps: Vec<packed::Byte32>,
+        signature_actions: HashMap<String, SignatureAction>,
+        type_witness_args: HashMap<usize, (packed::BytesOpt, packed::BytesOpt)>,
+    ) -> Result<(TransactionView, Vec<SignatureAction>)>;
 }
 
 impl<C: CkbRpc> MercuryRpcImpl<C> {

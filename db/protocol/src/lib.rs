@@ -118,12 +118,3 @@ pub struct ConsumeInfo {
     pub consumed_tx_hash: H256,
     pub consumed_tx_index: u32,
 }
-
-#[derive(Clone)]
-pub struct TransactionWrapper {
-    pub transaction_with_status: TransactionWithStatus,
-    pub transaction_view: TransactionView,
-    pub input_cells: Vec<DetailedCell>,
-    pub output_cells: Vec<DetailedCell>,
-    pub is_cellbase: bool,
-}

@@ -12,8 +12,9 @@ use relational::table::IndexerCellTable;
 
 use common::{
     async_trait, Context, DetailedCell, PaginationRequest, PaginationResponse, Range, Result,
+    TransactionWrapper,
 };
-use db_protocol::{SimpleBlock, SimpleTransaction, TransactionWrapper};
+use db_protocol::{SimpleBlock, SimpleTransaction};
 
 use ckb_types::core::{BlockNumber, BlockView, HeaderView};
 use ckb_types::{bytes::Bytes, packed, H160, H256};
@@ -255,12 +256,18 @@ pub trait ExtensionStorage {
     async fn get_cells_by_partial_args(
         &self,
         ctx: Context,
-        p_lock_args: Option<PartialScriptArgs>,
-        p_type_args: Option<PartialScriptArgs>,
+        p_lock_args: Option<PartialBytes>,
+        p_type_args: Option<PartialBytes>,
+    ) -> Result<Vec<DetailedCell>>;
+
+    async fn get_cells_by_partial_data(
+        &self,
+        ctx: Context,
+        p_data: Option<PartialBytes>,
     ) -> Result<Vec<DetailedCell>>;
 }
 
-pub struct PartialScriptArgs {
-    content: Bytes,
-    range: std::ops::Range<usize>,
+pub struct PartialBytes {
+    pub content: Bytes,
+    pub range: std::ops::Range<usize>,
 }

@@ -17,10 +17,10 @@ use crate::{error::DBError, Storage};
 
 use common::{
     async_trait, utils::to_fixed_array, Context, DetailedCell, Order, PaginationRequest,
-    PaginationResponse, Range, Result,
+    PaginationResponse, Range, Result, TransactionWrapper,
 };
 use common_logger::{tracing, tracing_async};
-use db_protocol::{DBDriver, DBInfo, SimpleBlock, SimpleTransaction, TransactionWrapper};
+use db_protocol::{DBDriver, DBInfo, SimpleBlock, SimpleTransaction};
 use db_xsql::{rbatis::core::types::byte::RbBytes, XSQLPool};
 
 use ckb_types::core::{BlockNumber, BlockView, HeaderView};
