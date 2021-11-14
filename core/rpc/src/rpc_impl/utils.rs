@@ -15,7 +15,7 @@ use common::hash::blake2b_160;
 use common::utils::{decode_dao_block_number, decode_udt_amount, parse_address, u256_low_u64};
 use common::{
     Address, AddressPayload, Context, DetailedCell, PaginationRequest, PaginationResponse, Range,
-    ACP, CHEQUE, DAO, SECP256K1,
+    ACP, CHEQUE, DAO, SECP256K1, async_trait, Result
 };
 use common_logger::tracing_async;
 use core_storage::Storage;
@@ -32,6 +32,41 @@ use protocol::TransactionWrapper;
 use std::collections::{HashMap, HashSet};
 use std::convert::TryInto;
 use std::str::FromStr;
+
+pub struct RpcUtils<S> {
+    storage: S,
+}
+
+#[async_trait]
+pub trait RpcUtility {
+    async fn get_scripts_by_identity(
+        &self,
+        ctx: Context,
+        ident: Identity,
+        lock_filter: Option<H256>,
+    ) -> Result<Vec<packed::Script>>;
+
+    async fn get_scripts_by_address(
+        &self,
+        ctx: Context,
+        addr: &Address,
+        lock_filter: Option<H256>,
+    ) -> Result<Vec<packed::Script>>;
+
+    async fn pool_live_cells_by_items(
+        &self,
+        ctx: Context,
+        items: Vec<Item>,
+        required_ckb: u64,
+        required_udts: Vec<RequiredUDT>,
+        source: Option<Source>,
+        input_capacity_sum: &mut u64,
+        pool_cells: &mut Vec<DetailedCell>,
+        script_set: &mut HashSet<String>,
+        signature_actions: &mut HashMap<String, SignatureAction>,
+        input_index: &mut usize,
+    ) -> Result<()>;
+}
 
 impl<C: CkbRpc> MercuryRpcImpl<C> {
     pub(crate) fn get_script_builder(
