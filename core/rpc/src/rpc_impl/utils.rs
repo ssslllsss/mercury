@@ -53,6 +53,20 @@ pub trait RpcUtility {
         lock_filter: Option<H256>,
     ) -> Result<Vec<packed::Script>>;
 
+    fn get_secp_address_by_item(&self, ctx: Context, item: Item) -> Result<Address>;
+
+    async fn get_live_cells_by_item(
+        &self,
+        ctx: Context,
+        item: Item,
+        asset_infos: HashSet<AssetInfo>,
+        tip_block_number: Option<BlockNumber>,
+        tip_epoch_number: Option<RationalU256>,
+        lock_filter: Option<H256>,
+        extra: Option<ExtraType>,
+        for_get_balance: bool,
+    ) -> Result<Vec<DetailedCell>>;
+
     async fn pool_live_cells_by_items(
         &self,
         ctx: Context,
